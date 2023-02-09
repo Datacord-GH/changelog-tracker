@@ -2,9 +2,9 @@ use serenity::prelude::SerenityError;
 use serenity::{http::Http, model::channel::Embed, model::webhook::Webhook, utils::Colour};
 use std::env;
 
-use crate::models::Changelog;
+use crate::models::{Changelog, Client};
 
-pub async fn send_message(changelog: &Changelog) -> Result<(), SerenityError> {
+pub async fn send_message(changelog: &Changelog, client: &Client) -> Result<(), SerenityError> {
     let http = Http::new("token");
     let token = env::var("CHANGELOG_WEBHOOK_URL").expect("missing CHANGELOG_WEBHOOK_URL in .env");
     let webhook = Webhook::from_url(&http, &token).await?;
@@ -18,13 +18,14 @@ pub async fn send_message(changelog: &Changelog) -> Result<(), SerenityError> {
             .description(&changelog.content)
             .footer(|f| f.text(format!("{} • {}", changelog.date, changelog.locale)))
             .image(&changelog.asset.as_ref().unwrap_or_else(|| &fail_safe_asset))
+            .title(format!("Changelog on {:#?}", client))
     });
 
     webhook
         .execute(&http, true, |w| {
             w.content(format!(
                 "<@&{}>",
-                env::var("ROLE_ID").expect("missing ROLE_ID in .env")
+                env::var("ROLE_ID").expect("missing ROLE_ID in .env"),
             ))
             .username("Changelog Manager")
             .embeds(vec![changelog_embed])

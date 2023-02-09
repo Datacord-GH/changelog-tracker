@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
 
         println!("[{:#?}] Found changelog: {}", client, changelog.date);
-        send_message(&changelog).await?;
+        send_message(&changelog, &client).await?;
 
         conn.execute(
             "INSERT INTO changelogs (changelog_id, client, locale, date, asset, asset_type, content) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
