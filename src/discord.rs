@@ -1,4 +1,3 @@
-use serenity::builder::CreateEmbed;
 use serenity::prelude::SerenityError;
 use serenity::{http::Http, model::channel::Embed, model::webhook::Webhook, utils::Colour};
 use std::env;
