@@ -2,7 +2,7 @@ mod discord;
 mod models;
 mod utils;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, env};
 
 use dotenv::dotenv;
 use rusqlite::{Connection, Result};
@@ -17,7 +17,7 @@ use crate::{
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
-    let conn = Connection::open("changelogs.db")?;
+    let conn = Connection::open(env::var("DB_URL").expect("missing DB_URL in .env"))?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS changelogs (changelog_id TEXT PRIMARY KEY, client TEXT , locale TEXT, date TEXT, asset TEXT, asset_type INTEGER, content TEXT)",
