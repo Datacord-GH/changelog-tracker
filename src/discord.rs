@@ -8,13 +8,9 @@ pub async fn send_message(changelog: &Changelog, client: &Client) -> Result<(), 
     let http = Http::new("token");
     let token = env::var("CHANGELOG_WEBHOOK_URL").expect("missing CHANGELOG_WEBHOOK_URL in .env");
     let webhook = Webhook::from_url(&http, &token).await?;
-    let fail_safe_asset = String::from("https://cdn.discordapp.com/embed/avatars/0.png");
 
-    let asset = match changelog.asset_type {
-        0 => "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Logo_of_YouTube_%282015-2017%29.svg/800px-Logo_of_YouTube_%282015-2017%29.svg.png",
-        1 => &changelog.asset.as_ref().unwrap_or_else(|| &fail_safe_asset),
-        _ => &fail_safe_asset,
-    };
+    let fail_safe_asset = String::from("https://discord.com/");
+    let asset = changelog.asset.as_ref().unwrap_or_else(|| &fail_safe_asset);
 
     let changelog_embed = Embed::fake(|e| {
         e.colour(Colour::from_rgb(135, 134, 255))
@@ -26,7 +22,11 @@ pub async fn send_message(changelog: &Changelog, client: &Client) -> Result<(), 
                 &changelog.content, &asset
             ))
             .footer(|f| f.text(format!("{} • {}", changelog.date, changelog.locale)))
-            .image(&asset)
+            .image(if changelog.asset_type == 1 {
+                &asset
+            } else {
+                ""
+            })
             .title(format!("Changelog on {:#?}", client))
     });
 

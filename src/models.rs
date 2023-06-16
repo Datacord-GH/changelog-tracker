@@ -35,4 +35,5 @@ pub struct Changelog {
 #[derive(Debug, Clone, Deserialize)]
 pub struct ChangelogConfig {
     pub min_version: usize,
+    pub show_on_startup: bool,
 }
