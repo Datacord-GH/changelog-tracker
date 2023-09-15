@@ -9,7 +9,7 @@ use rusqlite::{Connection, Result};
 
 use crate::{
     discord::send_message,
-    models::{Changelog, ChangelogConfig, ChangelogDB},
+    models::{Changelog, ChangelogConfig, ChangelogDB, ChangelogReqwest},
     utils::which_client,
 };
 
@@ -69,10 +69,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "https://cdn.discordapp.com/changelogs/{}/{}/en-US.json",
                 client_id, snowflake
             );
-            let changelog = reqwest::get(&changelog_url)
+            let changelog_req = reqwest::get(&changelog_url)
                 .await?
-                .json::<Changelog>()
+                .json::<ChangelogReqwest>()
                 .await?;
+
+            let changelog = Changelog::convert_from_reqwest(changelog_req);
 
             println!("[{:#?}] Found changelog: {}", client, changelog.date);
             send_message(&changelog, &client).await?;
@@ -85,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                &changelog.locale,
                &changelog.date,
                &changelog.asset,
-               &changelog.asset_type,
+               changelog.asset_type as u8,
                &changelog.content,
             ),
         )?;
